@@ -18,12 +18,13 @@ if config.config_file_name is not None:
 
 # Import models & config from backend app
 from app.core.config import settings
-from app.core.database import Base
+from app.core.database import Base, engine
 
 target_metadata = Base.metadata
 
-# Override sqlalchemy.url with the app configuration
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+# Override sqlalchemy.url with the app configuration, escaping % for configparser
+escaped_url = settings.DATABASE_URL.replace("%", "%%") if settings.DATABASE_URL else ""
+config.set_main_option("sqlalchemy.url", escaped_url)
 
 
 def run_migrations_offline() -> None:
@@ -58,20 +59,9 @@ def do_run_migrations(connection: Connection) -> None:
 
 
 async def run_async_migrations() -> None:
-    """In this scenario we need to create an Engine
-    and associate a connection with the context.
-
-    """
-    connectable = async_engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
-
-    async with connectable.connect() as connection:
+    """Run migrations in 'online' mode using the application's configured async engine."""
+    async with engine.connect() as connection:
         await connection.run_sync(do_run_migrations)
-
-    await connectable.dispose()
 
 
 def run_migrations_online() -> None:
