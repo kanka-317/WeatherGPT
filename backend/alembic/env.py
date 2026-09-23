@@ -23,7 +23,11 @@ from app.core.database import Base, engine
 target_metadata = Base.metadata
 
 # Override sqlalchemy.url with the app configuration, escaping % for configparser
-escaped_url = settings.DATABASE_URL.replace("%", "%%") if settings.DATABASE_URL else ""
+escaped_url = (
+    settings.DATABASE_URL.strip().replace("\r", "").replace("\n", "").replace("%", "%%")
+    if settings.DATABASE_URL
+    else ""
+)
 config.set_main_option("sqlalchemy.url", escaped_url)
 
 

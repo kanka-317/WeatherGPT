@@ -7,7 +7,7 @@ from sqlalchemy.orm import declarative_base
 from app.core.config import settings
 
 # Determine database URL: if db host 'db' is unreachable (running on local host outside Docker), fall back to SQLite
-db_url = settings.DATABASE_URL
+db_url = settings.DATABASE_URL.strip().replace("\r", "").replace("\n", "")
 parsed = urlparse(db_url)
 if parsed.hostname == "db":
     try:
