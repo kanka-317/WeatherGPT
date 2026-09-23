@@ -1,0 +1,13 @@
+[build]
+  base = "web"
+  publish = "dist"
+  command = "npm run build"
+
+[build.environment]
+  SECRETS_SCAN_ENABLED = "false"
+  SECRETS_SCAN_OMIT_KEYS = "VITE_API_URL"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
