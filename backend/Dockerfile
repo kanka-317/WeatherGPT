@@ -25,4 +25,4 @@ COPY . /app/
 EXPOSE 8000
 
 # Default command runs alembic migrations and starts uvicorn on dynamic PORT
-CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "alembic upgrade head || true && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
