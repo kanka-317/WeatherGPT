@@ -35,27 +35,27 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS Configuration for local development, Vercel/Netlify preview deploys, and production
-cors_origins = [str(origin).strip() for origin in settings.CORS_ORIGINS] if settings.CORS_ORIGINS else ["*"]
-is_wildcard = "*" in cors_origins
+# CORS Configuration: allow credentials for all origins (Netlify, Vercel, Render, local dev)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origin_regex=r"^https?://.*",
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-if is_wildcard:
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=False,
-        allow_methods=["*"],
-        allow_headers=["*"],
+from fastapi.responses import JSONResponse
+from fastapi import Request
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    import traceback
+    traceback.print_exc()
+    return JSONResponse(
+        status_code=500,
+        content={"detail": f"Internal Server Error: {str(exc)}"},
     )
-else:
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=cors_origins,
-        allow_origin_regex=r"https://.*(vercel\.app|netlify\.app|onrender\.com).*",
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
+
 
 # Root welcome endpoint
 @app.get("/", tags=["Root"])

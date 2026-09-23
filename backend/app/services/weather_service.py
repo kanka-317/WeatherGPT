@@ -132,6 +132,14 @@ class WeatherService:
             location.name = data["location_name"]
 
         # 5. Persist to PostgreSQL
+        raw_ts = data.get("timestamp", now)
+        if isinstance(raw_ts, datetime) and raw_ts.tzinfo is not None:
+            clean_ts = raw_ts.astimezone(timezone.utc).replace(tzinfo=None)
+        elif isinstance(raw_ts, datetime):
+            clean_ts = raw_ts
+        else:
+            clean_ts = now.replace(tzinfo=None) if hasattr(now, "tzinfo") and now.tzinfo is not None else now
+
         new_obs = WeatherObservation(
             location_id=location.id,
             temperature=data["temperature"],
@@ -141,7 +149,7 @@ class WeatherService:
             wind_direction=data.get("wind_direction"),
             condition=data["condition"],
             source=data.get("source", "openweather"),
-            timestamp=data.get("timestamp", now),
+            timestamp=clean_ts,
         )
         self.db.add(new_obs)
         await self.db.commit()

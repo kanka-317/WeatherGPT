@@ -140,7 +140,7 @@ class OpenWeatherProvider(WeatherProvider):
             "wind_direction": float(wind.get("deg")) if wind.get("deg") is not None else None,
             "condition": weather.get("main", "Clear"),
             "source": self.source_name,
-            "timestamp": datetime.now(timezone.utc),
+            "timestamp": datetime.now(timezone.utc).replace(tzinfo=None),
         }
 
     def _normalize_forecast(self, data: Dict[str, Any], lat: float, lon: float, days: int) -> Dict[str, Any]:
@@ -227,7 +227,7 @@ class OpenWeatherProvider(WeatherProvider):
             "wind_direction": 180.0,
             "condition": condition,
             "source": self.source_name,
-            "timestamp": datetime.now(timezone.utc),
+            "timestamp": datetime.now(timezone.utc).replace(tzinfo=None),
         }
 
     def _generate_fallback_forecast(self, lat: float, lon: float, days: int) -> Dict[str, Any]:
