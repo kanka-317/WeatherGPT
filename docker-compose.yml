@@ -1,0 +1,56 @@
+version: "3.8"
+
+services:
+  db:
+    build:
+      context: .
+      dockerfile: ./docker/postgres/Dockerfile
+    image: weathergpt-postgres:16-postgis-pgvector
+    container_name: weathergpt_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-weathergpt}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-weathergpt_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-weathergpt_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-weathergpt} -d ${POSTGRES_DB:-weathergpt_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: weathergpt_backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - ./backend/.env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-weathergpt}:${POSTGRES_PASSWORD:-weathergpt_secret}@db:5432/${POSTGRES_DB:-weathergpt_db}
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+
+  adminer:
+    image: adminer:latest
+    container_name: weathergpt_adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
