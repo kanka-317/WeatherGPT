@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str = ""
     OPENWEATHER_API_KEY: str = ""
 
+    # Monitoring (Sentry Free Tier)
+    SENTRY_DSN: str = ""
+
     @field_validator("DATABASE_URL", mode="before")
     @classmethod
     def clean_database_url(cls, v: str) -> str:

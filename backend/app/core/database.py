@@ -6,8 +6,24 @@ from sqlalchemy.orm import declarative_base
 
 from app.core.config import settings
 
-# Determine database URL: if db host 'db' is unreachable (running on local host outside Docker), fall back to SQLite
+# Determine database URL: sanitize driver prefix for asyncpg and support local fallback
 db_url = settings.DATABASE_URL.strip().replace("\r", "").replace("\n", "")
+
+# Normalize driver scheme for asyncpg (Supabase/Neon/Render often supply postgres:// or postgresql://)
+if db_url.startswith("postgres://"):
+    db_url = "postgresql+asyncpg://" + db_url[len("postgres://"):]
+elif db_url.startswith("postgresql://") and not db_url.startswith("postgresql+asyncpg://"):
+    db_url = "postgresql+asyncpg://" + db_url[len("postgresql://"):]
+
+# Remove sslmode query parameter if present because asyncpg does not accept it as a URL query param
+if "sslmode=" in db_url:
+    from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
+    _u = urlsplit(db_url)
+    _query_dict = dict(parse_qsl(_u.query))
+    _query_dict.pop("sslmode", None)
+    _new_query = urlencode(_query_dict)
+    db_url = urlunsplit((_u.scheme, _u.netloc, _u.path, _new_query, _u.fragment))
+
 parsed = urlparse(db_url)
 if parsed.hostname == "db":
     try:
@@ -19,7 +35,7 @@ if parsed.hostname == "db":
 connect_args = {}
 if "sqlite" in db_url:
     connect_args["check_same_thread"] = False
-elif "supabase" in db_url or "ssl=require" in db_url:
+elif "supabase" in db_url or "ssl=require" in db_url or parsed.hostname not in ("localhost", "127.0.0.1", "db"):
     connect_args["ssl"] = "require"
 
 engine = create_async_engine(

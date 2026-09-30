@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WeatherGPT Demo Video Teleprompter (SIH 2026)</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: rgba(18, 26, 43, 0.85);
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.35);
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --action-bg: #1e293b;
+      --action-border: #f59e0b;
+      --action-text: #fbbf24;
+      --highlight: #22c55e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Fixed Top Control Bar */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(11, 15, 25, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .title-group h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      font-weight: 600;
+    }
+
+    .timer-display {
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      font-variant-numeric: tabular-nums;
+      color: var(--accent);
+      text-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    button {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    button:hover {
+      background: #334155;
+    }
+
+    button.primary {
+      background: #0284c7;
+      border-color: #38bdf8;
+    }
+
+    button.primary:hover {
+      background: #0369a1;
+    }
+
+    .progress-container {
+      width: 100%;
+      height: 4px;
+      background: #1e293b;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #38bdf8, #22c55e);
+      transition: width 0.2s linear;
+    }
+
+    /* Teleprompter Content */
+    main {
+      flex: 1;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 32px 24px 120px;
+      width: 100%;
+    }
+
+    .cue-card {
+      background: var(--card-bg);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-bottom: 24px;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .cue-card.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 25px rgba(56, 189, 248, 0.25);
+      background: rgba(23, 37, 65, 0.95);
+      transform: scale(1.01);
+    }
+
+    .cue-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .cue-time {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.5px;
+    }
+
+    .cue-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .screen-action {
+      background: var(--action-bg);
+      border-left: 4px solid var(--action-border);
+      padding: 10px 14px;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.95rem;
+      color: var(--action-text);
+      font-weight: 500;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .spoken-text {
+      font-size: 1.35rem;
+      line-height: 1.65;
+      font-weight: 400;
+      color: #f8fafc;
+    }
+
+    .spoken-text strong {
+      color: #38bdf8;
+    }
+
+    .shortcut-hint {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="title-group">
+      <h1>WeatherGPT Demo Teleprompter <span class="badge">SIH 2026 • PS 26068</span></h1>
+      <div class="shortcut-hint">Press <strong>Spacebar</strong> to Start/Pause • Target: 2:55</div>
+    </div>
+    
+    <div class="timer-display" id="timer">00:00</div>
+
+    <div class="controls">
+      <button id="toggleBtn" class="primary" onclick="toggleTimer()">▶ Start</button>
+      <button onclick="resetTimer()">↺ Reset</button>
+    </div>
+
+    <div class="progress-container">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Section 1 -->
+    <div class="cue-card" id="cue-0" data-start="0" data-end="15">
+      <div class="cue-header">
+        <span class="cue-time">[0:00 – 0:15]</span>
+        <span class="cue-title">Hook & Overview</span>
+      </div>
+      <div class="screen-action">
+        🖥️ <strong>ACTION:</strong> Display clean WeatherGPT chat home screen. Don't click yet.
+      </div>
+      <div class="spoken-text">
+        "Most weather apps show complicated isobar charts and technical jargon that rural farmers and fisherfolk simply can't act on. This is WeatherGPT — India's conversational meteorological intelligence layer. It speaks native Bengali, Hindi, and English, grounds every answer in live data, and pushes disaster alerts in under a hundred milliseconds. Let me show you how it works."
+      </div>
+    </div>
+
+    <!-- Section 2 -->
+    <div class="cue-card" id="cue-1" data-start="15" data-end="45">
+      <div class="cue-header">
+        <span class="cue-time">[0:15 – 0:45]</span>
+        <span class="cue-title">Live Query & Citing</span>
+      </div>
+      <div class="screen-action">
+        ⌨️ <strong>ACTION:</strong> Type: <em>"Will it rain in Kolkata tomorrow evening?"</em> & Send. Hover over the source & timestamp.
+      </div>
+      <div class="spoken-text">
+        "Here's a citizen asking a simple question. Behind the scenes, WeatherGPT isn't guessing — it's calling our live weather API, checking for any active district alerts, and only then generating this answer. Notice it cites the data source and the timestamp right here — that's deliberate. The AI is never allowed to invent a forecast or a warning; it can only report what the live data actually says."
+      </div>
+    </div>
+
+    <!-- Section 3 -->
+    <div class="cue-card" id="cue-2" data-start="45" data-end="70">
+      <div class="cue-header">
+        <span class="cue-time">[0:45 – 1:10]</span>
+        <span class="cue-title">Role-Based Personalization</span>
+      </div>
+      <div class="screen-action">
+        🌾 <strong>ACTION:</strong> Switch role to Farmer or ask: <em>"I'm a farmer in Nadia — should I irrigate tomorrow?"</em>
+      </div>
+      <div class="spoken-text">
+        "Now watch what happens when the same weather event is asked about by a farmer instead of a general citizen. The advice changes — it's not just the raw forecast, it's a practical recommendation: postpone irrigation, here's why, here's the rain probability window. The same underlying data, reasoned differently for each type of user — a farmer, a fisherman, a disaster manager — each gets an answer that's actually useful to them."
+      </div>
+    </div>
+
+    <!-- Section 4 -->
+    <div class="cue-card" id="cue-3" data-start="70" data-end="100">
+      <div class="cue-header">
+        <span class="cue-time">[1:10 – 1:40]</span>
+        <span class="cue-title">Multilingual Bengali Voice</span>
+      </div>
+      <div class="screen-action">
+        🎙️ <strong>ACTION:</strong> Switch language to Bengali. Tap mic, speak: <em>"কাল বৃষ্টি হবে?"</em> Wait for speech playback.
+      </div>
+      <div class="spoken-text">
+        "India's rural population often can't read complex English or Hindi bulletins — so voice and language were core requirements, not an afterthought. I'll switch to Bengali and just ask by voice."
+        <br><br>
+        <em>[Wait 2–3s for response audio]</em>
+        <br><br>
+        "It transcribed the question, answered in Bengali, and read the response back out loud — completely hands-free, which matters a lot for a farmer standing in a field with a basic smartphone."
+      </div>
+    </div>
+
+    <!-- Section 5 -->
+    <div class="cue-card" id="cue-4" data-start="100" data-end="130">
+      <div class="cue-header">
+        <span class="cue-time">[1:40 – 2:10]</span>
+        <span class="cue-title">Live GIS Disaster Map</span>
+      </div>
+      <div class="screen-action">
+        🗺️ <strong>ACTION:</strong> Switch to Disaster Operations Map tab. Trigger/point at Nadia heavy-rainfall alert.
+      </div>
+      <div class="spoken-text">
+        "Now the disaster-management side. This is the live risk map — districts are color-coded by alert severity in real time over a WebSocket connection, so there's no manual refresh. Watch — I'm triggering a heavy-rainfall warning for Nadia district right now."
+        <br><br>
+        "That update reached the map in well under a second. A disaster manager sitting in an operations room sees this the instant it happens, not fifteen minutes later over SMS like a lot of legacy systems."
+      </div>
+    </div>
+
+    <!-- Section 6 -->
+    <div class="cue-card" id="cue-5" data-start="130" data-end="155">
+      <div class="cue-header">
+        <span class="cue-time">[2:10 – 2:35]</span>
+        <span class="cue-title">Live Backend & API Proof</span>
+      </div>
+      <div class="screen-action">
+        ⚡ <strong>ACTION:</strong> Switch to tab: <em>weathergpt-backend-g6ds.onrender.com/docs</em>
+      </div>
+      <div class="spoken-text">
+        "And to be clear, this isn't a mockup — this is a real, live backend. Here's our FastAPI service with interactive API documentation, running right now on Render, backed by a PostgreSQL and PostGIS database on Supabase. Every response you just saw came from this actual running system."
+      </div>
+    </div>
+
+    <!-- Section 7 -->
+    <div class="cue-card" id="cue-6" data-start="155" data-end="175">
+      <div class="cue-header">
+        <span class="cue-time">[2:35 – 2:55]</span>
+        <span class="cue-title">Impact Statement & Close</span>
+      </div>
+      <div class="screen-action">
+        🏁 <strong>ACTION:</strong> Switch back to App Home. Prepare to stop recording.
+      </div>
+      <div class="spoken-text">
+        "WeatherGPT turns raw meteorological data into something a citizen, a farmer, a fisherman, or a disaster manager can actually act on — in their own language, by voice, in real time, and always grounded in real data. That's WeatherGPT, built by team Helix Minds for Problem Statement 26068. Thank you."
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let seconds = 0;
+    let timerInterval = null;
+    const totalTarget = 175; // 2m 55s
+    const cards = document.querySelectorAll('.cue-card');
+    const timerEl = document.getElementById('timer');
+    const progressBar = document.getElementById('progressBar');
+    const toggleBtn = document.getElementById('toggleBtn');
+
+    function updateDisplay() {
+      const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+      const secs = (seconds % 60).toString().padStart(2, '0');
+      timerEl.textContent = `${mins}:${secs}`;
+      
+      const pct = Math.min((seconds / totalTarget) * 100, 100);
+      progressBar.style.width = pct + '%';
+
+      cards.forEach(card => {
+        const start = parseInt(card.dataset.start);
+        const end = parseInt(card.dataset.end);
+        if (seconds >= start && seconds < end) {
+          if (!card.classList.contains('active')) {
+            card.classList.add('active');
+            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        } else {
+          card.classList.remove('active');
+        }
+      });
+    }
+
+    function toggleTimer() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        toggleBtn.textContent = '▶ Resume';
+        toggleBtn.classList.remove('primary');
+      } else {
+        timerInterval = setInterval(() => {
+          seconds++;
+          updateDisplay();
+        }, 1000);
+        toggleBtn.textContent = '⏸ Pause';
+        toggleBtn.classList.add('primary');
+      }
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      seconds = 0;
+      updateDisplay();
+      toggleBtn.textContent = '▶ Start';
+      toggleBtn.classList.add('primary');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        toggleTimer();
+      }
+    });
+
+    updateDisplay();
+  </script>
+</body>
+</html>

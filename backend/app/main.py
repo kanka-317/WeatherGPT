@@ -19,9 +19,20 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     yield
-    # Shutdown actions
-    print(f"Shutting down {settings.PROJECT_NAME} backend...")
-
+# Initialize Sentry if SENTRY_DSN is configured
+if settings.SENTRY_DSN:
+    try:
+        import sentry_sdk
+        sentry_sdk.init(
+            dsn=settings.SENTRY_DSN,
+            traces_sample_rate=1.0,
+            profiles_sample_rate=1.0,
+            environment="production" if not settings.DEBUG else "development",
+            send_default_pii=False,
+        )
+        print("Sentry error tracking initialized successfully.")
+    except Exception as e:
+        print(f"Failed to initialize Sentry: {e}")
 
 from fastapi.responses import RedirectResponse
 
