@@ -6,7 +6,7 @@ on:
       backend_url:
         description: 'Backend API URL (Render)'
         required: true
-        default: 'https://weathergpt-backend.onrender.com'
+        default: 'https://weathergpt-backend-g6ds.onrender.com'
       tag_name:
         description: 'Release Tag (e.g. v1.0.0)'
         required: true
@@ -44,19 +44,30 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Generate Android & Web Scaffolding
+        run: |
+          echo "Generating platform scaffolding for Android and Web..."
+          cp pubspec.yaml pubspec.yaml.bak
+          flutter create --platforms=android,web --org com.helixminds.weathergpt --project-name weathergpt_mobile .
+          cp pubspec.yaml.bak pubspec.yaml
+          
+          # Ensure INTERNET permission is granted in AndroidManifest.xml
+          if [ -f android/app/src/main/AndroidManifest.xml ]; then
+            sed -i '/<application/i \    <uses-permission android:name="android.permission.INTERNET"/>' android/app/src/main/AndroidManifest.xml || true
+          fi
+
       - name: Install Dependencies
         run: flutter pub get
 
       - name: Build Release APK
         env:
-          BACKEND_URL: ${{ github.event.inputs.backend_url || 'https://weathergpt-backend.onrender.com' }}
+          BACKEND_URL: ${{ github.event.inputs.backend_url || 'https://weathergpt-backend-g6ds.onrender.com' }}
         run: |
           flutter build apk --release --dart-define=BACKEND_URL=$BACKEND_URL
-          cp build/app/outputs/flutter-apk/app-release.apk ../WeatherGPT-Mobile-v1.0.0.apk || true
 
       - name: Build Flutter Web (Fallback Zero-Install)
         env:
-          BACKEND_URL: ${{ github.event.inputs.backend_url || 'https://weathergpt-backend.onrender.com' }}
+          BACKEND_URL: ${{ github.event.inputs.backend_url || 'https://weathergpt-backend-g6ds.onrender.com' }}
         run: |
           flutter build web --release --dart-define=BACKEND_URL=$BACKEND_URL
 
@@ -81,13 +92,13 @@ jobs:
           body: |
             ## 📱 WeatherGPT Mobile Client — Direct APK Download
             - **Target Problem Statement**: SIH 26068
-            - **Backend Endpoint**: `${{ github.event.inputs.backend_url || 'https://weathergpt-backend.onrender.com' }}`
+            - **Backend Endpoint**: `${{ github.event.inputs.backend_url || 'https://weathergpt-backend-g6ds.onrender.com' }}`
             - **Architecture**: Flutter + Riverpod + WebSocket Real-Time Alerts
             
-            ### Installation
-            1. Download `WeatherGPT-Mobile.apk` directly to your Android device.
-            2. Enable *Install from Unknown Sources* if prompted.
-            3. Open the app to access conversational meteorological intelligence and live disaster alerts.
+            ### Installation Instructions
+            1. Download `app-release.apk` directly to your Android device.
+            2. Open the file and enable **"Install from unknown sources"** when prompted.
+            3. Launch WeatherGPT to access conversational meteorological intelligence and live disaster alerts.
           files: |
             mobile/build/app/outputs/flutter-apk/app-release.apk
         env:
