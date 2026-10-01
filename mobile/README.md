@@ -1,39 +1,71 @@
-# WeatherGPT Mobile Client (SIH PS 26068)
+# WeatherGPT Mobile Client (Flutter)
 
-Flutter client for **WeatherGPT — AI-Driven Meteorological Intelligence & Disaster Early-Warning System**.
+A cross-platform mobile client for **WeatherGPT** (SIH PS 26068), built with **100% feature parity** with the live web dashboard ([weathergpt12.netlify.app](https://weathergpt12.netlify.app)), connected to the production cloud backend at `https://weathergpt-backend-g6ds.onrender.com`.
 
 ---
 
-## 🛠️ Free Distribution Builds
+## 📱 Full Module Architecture
 
-### 1. Build Signed Android APK
-Run from within the `mobile/` directory:
+```text
+mobile/
+├── pubspec.yaml
+└── lib/
+    ├── main.dart                             # App entry, glassmorphic dark theme, bottom navigation shell
+    ├── core/
+    │   ├── constants.dart                    # Backend URLs, WebSocket endpoints, color tokens, personas
+    │   └── storage.dart                      # SharedPreferences local persistence (sessions, chat, role)
+    ├── models/
+    │   ├── weather_models.dart               # Current weather, 5-day forecast, atmospheric telemetry
+    │   ├── alert_model.dart                  # Active alerts, color-coded severity, icons
+    │   ├── chat_message.dart                 # Chat bubbles, explainability metadata, tools called
+    │   └── user_model.dart                   # Role-based user profile (Citizen, Farmer, Fisherman, Admin)
+    ├── services/
+    │   ├── api_service.dart                  # Centralized HTTP client with Render cold-start retry
+    │   └── websocket_service.dart            # Live /ws/alerts subscription with auto-reconnection
+    ├── widgets/
+    │   ├── weather_summary_card.dart         # Glassmorphic telemetry & swipeable forecast card
+    │   ├── chat_bubble_widget.dart           # Chat bubble with "Why this answer" explainability
+    │   ├── alert_banner_widget.dart          # Live in-app push alert banner
+    │   ├── role_selector_sheet.dart          # Persona switcher modal (Citizen, Farmer, Fisherman, War Room)
+    │   └── waking_server_indicator.dart      # Render free-tier cold-start indicator banner
+    └── screens/
+        ├── chat_screen.dart                  # 1. Conversational Chat + Voice + Explainability
+        ├── real_time_weather_screen.dart     # 2. Comprehensive real-time weather & 5-day forecast
+        ├── alerts_screen.dart                # 3. Early Warning & Live Alert Feed (WebSockets)
+        ├── risk_map_screen.dart              # 6. GIS Disaster Risk Map (flutter_map)
+        ├── climate_analytics_screen.dart     # 7. Climate Trends & Forecast Analytics (fl_chart)
+        ├── disaster_manager_screen.dart      # 8. Disaster Manager Dashboard (Admin War Room)
+        └── auth_screen.dart                  # 9. Sign In / Sign Up & Persona Management
+```
+
+---
+
+## 🎨 Intentional Mobile UI Adaptations
+
+| Module | Web Dashboard Layout | Mobile App Adaptation | Rationale |
+| :--- | :--- | :--- | :--- |
+| **Disaster Manager Dashboard** | Wide multi-column data table | **Card list + KPI chips** | Tables with 6+ columns cause severe horizontal scrolling on phones. Card list preserves all severity badges, timestamps, and dismiss actions natively. |
+| **Forecast Intervals** | Wide horizontal timeline | **Swipeable cards + 2-tab view** | Splits into *"Current & Hourly"* and *"5-Day Forecast"* tabs for ergonomic vertical scrolling. |
+| **GIS Risk Map** | WebGL canvas with overlay sidebar | **Full-screen map + Bottom sheet modal** | Tapping district pins slides up an interactive bottom sheet war room rather than squishing a desktop sidebar onto a 6-inch display. |
+| **Role Selector** | Top bar dropdown menu | **Modal bottom sheet** | Thumb-friendly bottom sheet with descriptive persona badges and role descriptions. |
+
+---
+
+## 🚀 Building & Running
+
+### 1. Install Dependencies
 ```bash
 flutter pub get
-flutter build apk --release --dart-define=BACKEND_URL=https://weathergpt-backend.onrender.com
 ```
-The output file is generated at:
-`mobile/build/app/outputs/flutter-apk/app-release.apk`
 
-Rename this file to:
-`WeatherGPT_PS26068_v1.0.0.apk`
-
-### 2. Host on GitHub Releases (Free Tier APK Distribution)
-1. Go to your GitHub repository &rarr; **Releases** &rarr; **Draft a new release**.
-2. Set tag to `v1.0.0` (or your version).
-3. Title: `WeatherGPT Mobile v1.0.0 (SIH PS 26068)`.
-4. Drag and drop `WeatherGPT_PS26068_v1.0.0.apk` into the release binaries box.
-5. Click **Publish release**. Evaluators and users can now directly download and sideload the APK onto any Android phone with zero Play Store fee.
-
-### 3. Build Flutter Web Fallback (Zero-Install Browser Access)
-For evaluators or judges on iOS or desktop without an Android test device:
+### 2. Run Locally (Emulator / Physical Device)
 ```bash
-flutter build web --release --dart-define=BACKEND_URL=https://weathergpt-backend.onrender.com
+flutter run
 ```
-Deploy the resulting `mobile/build/web` folder to Netlify, Vercel, or GitHub Pages.
 
----
-
-## ⚡ Automated CI/CD
-A GitHub Actions workflow is pre-configured at [`.github/workflows/mobile_release.yml`](../.github/workflows/mobile_release.yml).
-Whenever you push a tag (`git tag v1.0.0 && git push origin v1.0.0`) or click **Run workflow** under the GitHub Actions tab, it compiles both the APK and Web fallback automatically in the cloud and attaches the APK to GitHub Releases.
+### 3. Build Production APK (Free Distribution for Judges)
+```bash
+flutter build apk --release
+```
+The output APK will be located at:
+`build/app/outputs/flutter-apk/app-release.apk`

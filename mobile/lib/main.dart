@@ -1,8 +1,22 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:google_fonts/google_fonts.dart';
+import 'core/constants.dart';
+import 'core/storage.dart';
+import 'models/user_model.dart';
+import 'services/websocket_service.dart';
+import 'widgets/waking_server_indicator.dart';
+import 'screens/chat_screen.dart';
+import 'screens/real_time_weather_screen.dart';
+import 'screens/alerts_screen.dart';
+import 'screens/risk_map_screen.dart';
+import 'screens/climate_analytics_screen.dart';
+import 'screens/disaster_manager_screen.dart';
+import 'screens/auth_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await LocalStorageService.init();
+  WebSocketService().connect();
   runApp(const WeatherGPTApp());
 }
 
@@ -16,272 +30,162 @@ class WeatherGPTApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF0B1120),
+        scaffoldBackgroundColor: AppColors.background,
+        textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
         colorScheme: const ColorScheme.dark(
-          primary: Color(0xFF06B6D4),
-          secondary: Color(0xFF10B981),
-          surface: Color(0xFF1E293B),
+          primary: AppColors.primaryCyan,
+          secondary: AppColors.accentEmerald,
+          surface: AppColors.surfaceCard,
+          error: AppColors.dangerRed,
         ),
         useMaterial3: true,
       ),
-      home: const ChatScreen(),
+      home: const MainNavigationShell(),
     );
   }
 }
 
-class MessageItem {
-  final String role;
-  final String content;
-  final List<String> tools;
-  final DateTime timestamp;
-  final Map<String, dynamic>? weatherData;
-
-  MessageItem({
-    required this.role,
-    required this.content,
-    this.tools = const [],
-    required this.timestamp,
-    this.weatherData,
-  });
-}
-
-class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key});
+class MainNavigationShell extends StatefulWidget {
+  const MainNavigationShell({super.key});
 
   @override
-  State<ChatScreen> createState() => _ChatScreenState();
+  State<MainNavigationShell> createState() => _MainNavigationShellState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
-  final TextEditingController _controller = TextEditingController();
-  final ScrollController _scrollController = ScrollController();
-  final List<MessageItem> _messages = [];
-  bool _isLoading = false;
-  String _currentLocation = 'Kolkata';
-  double _lat = 22.5726;
-  double _lon = 88.3639;
-  // Configurable backend URL: uses compile-time BACKEND_URL or defaults to deployed Render cloud service
-  String _backendUrl = const String.fromEnvironment(
-    'BACKEND_URL',
-    defaultValue: 'https://weathergpt-backend.onrender.com',
-  );
+class _MainNavigationShellState extends State<MainNavigationShell> {
+  int _currentIndex = 0;
+  Map<String, dynamic> _location = {
+    'name': 'Kolkata',
+    'lat': 22.5726,
+    'lon': 88.3639,
+    'state': 'West Bengal',
+  };
+  UserModel? _currentUser;
+  String _userRole = 'citizen';
 
   @override
   void initState() {
     super.initState();
-    _fetchInitialWeather();
-  }
-
-  Future<void> _fetchInitialWeather() async {
-    try {
-      final res = await http.get(Uri.parse('$_backendUrl/weather/current?lat=$_lat&lon=$_lon'));
-      if (res.statusCode == 200) {
-        final data = jsonDecode(res.body);
-        setState(() {
-          _messages.add(
-            MessageItem(
-              role: 'assistant',
-              content: 'Welcome to WeatherGPT (SIH PS 26068). Live weather loaded for $_currentLocation.',
-              timestamp: DateTime.now(),
-              weatherData: data,
-            ),
-          );
-        });
-      }
-    } catch (_) {
-      // Offline fallback welcome
-      setState(() {
-        _messages.add(
-          MessageItem(
-            role: 'assistant',
-            content: 'Welcome to WeatherGPT. Ask me anything about current weather, 5-day forecasts, or farming advisories.',
-            timestamp: DateTime.now(),
-          ),
-        );
-      });
+    _location = LocalStorageService.getLocation();
+    _userRole = LocalStorageService.getUserRole();
+    final profile = LocalStorageService.getUserProfile();
+    if (profile != null) {
+      _currentUser = UserModel.fromJson(profile);
+      _userRole = _currentUser!.role;
     }
   }
 
-  Future<void> _sendMessage([String? prompt]) async {
-    final text = prompt ?? _controller.text.trim();
-    if (text.isEmpty || _isLoading) return;
+  void _onLocationChanged(Map<String, dynamic> newLoc) {
+    setState(() => _location = newLoc);
+    LocalStorageService.setLocation(newLoc);
+  }
 
+  void _openAuthDialog() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (ctx) => AuthScreen(
+          onAuthSuccess: (user) {
+            setState(() {
+              _currentUser = user;
+              _userRole = user.role;
+            });
+          },
+        ),
+      ),
+    );
+  }
+
+  void _signOut() async {
+    await LocalStorageService.setUserProfile(null);
+    await LocalStorageService.setUserRole('citizen');
     setState(() {
-      _messages.add(MessageItem(role: 'user', content: text, timestamp: DateTime.now()));
-      _isLoading = true;
-    });
-    _controller.clear();
-    _scrollToBottom();
-
-    try {
-      final res = await http.post(
-        Uri.parse('$_backendUrl/chat'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'message': text,
-          'session_id': 'flutter-session-01',
-          'lat': _lat,
-          'lon': _lon,
-        }),
-      );
-
-      if (res.statusCode == 200) {
-        final data = jsonDecode(res.body);
-        setState(() {
-          _messages.add(
-            MessageItem(
-              role: 'assistant',
-              content: data['reply'] ?? '',
-              tools: List<String>.from(data['tools_called'] ?? []),
-              timestamp: DateTime.now(),
-            ),
-          );
-        });
-      } else {
-        throw Exception('Server error: ${res.statusCode}');
-      }
-    } catch (e) {
-      setState(() {
-        _messages.add(
-          MessageItem(
-            role: 'assistant',
-            content: 'Could not connect to the WeatherGPT backend. Please verify the server is running.',
-            timestamp: DateTime.now(),
-          ),
-        );
-      });
-    } finally {
-      setState(() => _isLoading = false);
-      _scrollToBottom();
-    }
-  }
-
-  void _scrollToBottom() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-      }
+      _currentUser = null;
+      _userRole = 'citizen';
+      if (_currentIndex >= 5) _currentIndex = 0;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('WeatherGPT', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-            Text('SIH PS 26068 · $_currentLocation', style: const TextStyle(fontSize: 12, color: Colors.cyanAccent)),
-          ],
+    final isDisasterManager = _userRole == 'disaster_manager';
+
+    // Screens list (matching all 9 modules requested)
+    final screens = [
+      ChatScreen(location: _location, onLocationChanged: _onLocationChanged),
+      RealTimeWeatherScreen(location: _location, onLocationChanged: _onLocationChanged),
+      AlertsScreen(location: _location),
+      RiskMapScreen(location: _location),
+      ClimateAnalyticsScreen(location: _location),
+      if (isDisasterManager) const DisasterManagerScreen(),
+    ];
+
+    // Bottom Navigation Bar items
+    final navItems = [
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.chat_bubble_outline_rounded),
+        activeIcon: Icon(Icons.chat_bubble_rounded),
+        label: 'AI Chat',
+      ),
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.cloud_outlined),
+        activeIcon: Icon(Icons.cloud_rounded),
+        label: 'Weather',
+      ),
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.notifications_none_rounded),
+        activeIcon: Icon(Icons.notifications_active_rounded),
+        label: 'Alerts',
+      ),
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.map_outlined),
+        activeIcon: Icon(Icons.map_rounded),
+        label: 'GIS Map',
+      ),
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.analytics_outlined),
+        activeIcon: Icon(Icons.analytics_rounded),
+        label: 'Analytics',
+      ),
+      if (isDisasterManager)
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.shield_outlined),
+          activeIcon: Icon(Icons.shield_rounded),
+          label: 'War Room',
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.location_on, color: Colors.cyanAccent),
-            onPressed: () {
-              setState(() {
-                if (_currentLocation == 'Kolkata') {
-                  _currentLocation = 'Nadia';
-                  _lat = 23.4710;
-                  _lon = 88.5565;
-                } else {
-                  _currentLocation = 'Kolkata';
-                  _lat = 22.5726;
-                  _lon = 88.3639;
-                }
-              });
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Switched demo location to $_currentLocation')),
-              );
-            },
+    ];
+
+    return Scaffold(
+      body: Column(
+        children: [
+          // Cold-start indicator for Render free tier
+          const WakingServerIndicator(),
+
+          // Active Screen
+          Expanded(
+            child: IndexedStack(
+              index: _currentIndex < screens.length ? _currentIndex : 0,
+              children: screens,
+            ),
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // Message list
-          Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(12),
-              itemCount: _messages.length,
-              itemBuilder: (context, idx) {
-                final m = _messages[idx];
-                final isUser = m.role == 'user';
-                return Align(
-                  alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: 4),
-                    padding: const EdgeInsets.all(12),
-                    constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.8),
-                    decoration: BoxDecoration(
-                      color: isUser ? const Color(0xFF0891B2) : const Color(0xFF1E293B),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: isUser ? Colors.transparent : const Color(0xFF334155),
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (m.tools.isNotEmpty)
-                          Wrap(
-                            spacing: 4,
-                            children: m.tools
-                                .map((t) => Chip(
-                                      label: Text(t, style: const TextStyle(fontSize: 10, color: Colors.cyanAccent)),
-                                      backgroundColor: const Color(0xFF0F172A),
-                                      padding: EdgeInsets.zero,
-                                    ))
-                                .toList(),
-                          ),
-                        Text(m.content, style: const TextStyle(fontSize: 14)),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          if (_isLoading)
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: LinearProgressIndicator(color: Colors.cyanAccent),
-            ),
-          // Input bar
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            color: const Color(0xFF0F172A),
-            child: Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.mic, color: Colors.cyanAccent),
-                  onPressed: () {
-                    _sendMessage("Will it rain in Kolkata tomorrow?");
-                  },
-                ),
-                Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    onSubmitted: (_) => _sendMessage(),
-                    decoration: const InputDecoration(
-                      hintText: 'Ask WeatherGPT...',
-                      border: InputBorder.none,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.send, color: Colors.cyanAccent),
-                  onPressed: () => _sendMessage(),
-                ),
-              ],
-            ),
-          ),
-        ],
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: AppColors.surfaceCard,
+          border: Border(top: BorderSide(color: AppColors.surfaceBorder)),
+        ),
+        child: BottomNavigationBar(
+          currentIndex: _currentIndex < navItems.length ? _currentIndex : 0,
+          onTap: (index) => setState(() => _currentIndex = index),
+          backgroundColor: AppColors.surfaceCard,
+          selectedItemColor: AppColors.primaryCyan,
+          unselectedItemColor: AppColors.textMuted,
+          selectedFontSize: 11,
+          unselectedFontSize: 10,
+          type: BottomNavigationBarType.fixed,
+          items: navItems,
+        ),
       ),
     );
   }
