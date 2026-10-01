@@ -109,7 +109,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
                 margin: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: connected ? AppColors.accentEmerald.withValues(alpha: 0.15) : AppColors.dangerRed.withValues(alpha: 0.15),
+                  color: connected ? AppColors.accentEmerald.withOpacity(0.15) : AppColors.dangerRed.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: connected ? AppColors.accentEmerald : AppColors.dangerRed),
                 ),
@@ -175,7 +175,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.shield_outlined, size: 54, color: AppColors.accentEmerald.withValues(alpha: 0.6)),
+                            Icon(Icons.shield_outlined, size: 54, color: AppColors.accentEmerald.withOpacity(0.6)),
                             const SizedBox(height: 12),
                             const Text(
                               'No Active Severe Warnings',
@@ -206,10 +206,10 @@ class _AlertsScreenState extends State<AlertsScreen> {
                               decoration: BoxDecoration(
                                 color: AppColors.surfaceCard,
                                 borderRadius: BorderRadius.circular(18),
-                                border: Border.all(color: color.withValues(alpha: 0.5), width: 1.2),
+                                border: Border.all(color: color.withOpacity(0.5), width: 1.2),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: color.withValues(alpha: 0.08),
+                                    color: color.withOpacity(0.08),
                                     blurRadius: 10,
                                     offset: const Offset(0, 4),
                                   ),

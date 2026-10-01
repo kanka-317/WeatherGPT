@@ -1,0 +1,8 @@
+[build]
+  publish = "build/web"
+  command = "flutter build web --release --dart-define=BACKEND_URL=https://weathergpt-backend-g6ds.onrender.com"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

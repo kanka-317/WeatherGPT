@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'core/constants.dart';
 import 'core/storage.dart';
 import 'models/user_model.dart';
@@ -13,11 +14,23 @@ import 'screens/climate_analytics_screen.dart';
 import 'screens/disaster_manager_screen.dart';
 import 'screens/auth_screen.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await LocalStorageService.init();
   WebSocketService().connect();
-  runApp(const WeatherGPTApp());
+
+  if (AppConstants.sentryDsn.isNotEmpty) {
+    await SentryFlutter.init(
+      (options) {
+        options.dsn = AppConstants.sentryDsn;
+        options.tracesSampleRate = 1.0;
+        options.environment = 'production';
+      },
+      appRunner: () => runApp(const WeatherGPTApp()),
+    );
+  } else {
+    runApp(const WeatherGPTApp());
+  }
 }
 
 class WeatherGPTApp extends StatelessWidget {
@@ -156,6 +169,69 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
     ];
 
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: AppColors.surfaceCard,
+        elevation: 0,
+        titleSpacing: 16,
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppColors.primaryCyan.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: AppColors.primaryCyan.withOpacity(0.3)),
+              ),
+              child: const Text(
+                'WeatherGPT',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primaryCyan),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              _location['name'] ?? 'Kolkata',
+              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(
+              _currentUser != null ? Icons.account_circle : Icons.login_rounded,
+              color: _currentUser != null ? AppColors.accentEmerald : AppColors.primaryCyan,
+              size: 22,
+            ),
+            tooltip: _currentUser != null ? 'Signed in as ${_currentUser!.fullName} ($_userRole)' : 'Sign In / Switch Role',
+            onPressed: () {
+              if (_currentUser != null) {
+                showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    backgroundColor: AppColors.surfaceCard,
+                    title: Text(_currentUser!.fullName),
+                    content: Text('Role: ${_userRole.toUpperCase()}\nEmail: ${_currentUser!.email}'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: const Text('Close'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                          _signOut();
+                        },
+                        child: const Text('Sign Out', style: TextStyle(color: AppColors.dangerRed)),
+                      ),
+                    ],
+                  ),
+                );
+              } else {
+                _openAuthDialog();
+              }
+            },
+          ),
+        ],
+      ),
       body: Column(
         children: [
           // Cold-start indicator for Render free tier
@@ -173,7 +249,7 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           color: AppColors.surfaceCard,
-          border: const Border(top: const BorderSide(color: AppColors.surfaceBorder)),
+          border: Border(top: BorderSide(color: AppColors.surfaceBorder)),
         ),
         child: BottomNavigationBar(
           currentIndex: _currentIndex < navItems.length ? _currentIndex : 0,

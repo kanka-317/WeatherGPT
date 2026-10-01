@@ -203,9 +203,9 @@ class _ChatScreenState extends State<ChatScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryCyan.withValues(alpha: 0.15),
+                    color: AppColors.primaryCyan.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: AppColors.primaryCyan.withValues(alpha: 0.3)),
+                    border: Border.all(color: AppColors.primaryCyan.withOpacity(0.3)),
                   ),
                   child: const Text('SIH PS 26068', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.primaryCyan)),
                 ),
@@ -237,7 +237,7 @@ class _ChatScreenState extends State<ChatScreen> {
               decoration: BoxDecoration(
                 color: AppColors.surfaceElevated,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppColors.primaryCyan.withValues(alpha: 0.4)),
+                border: Border.all(color: AppColors.primaryCyan.withOpacity(0.4)),
               ),
               child: Row(
                 children: [
@@ -372,7 +372,7 @@ class _ChatScreenState extends State<ChatScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: const BoxDecoration(
               color: AppColors.surfaceCard,
-              border: const Border(top: const BorderSide(color: AppColors.surfaceBorder)),
+              border: Border(top: BorderSide(color: AppColors.surfaceBorder)),
             ),
             child: SafeArea(
               child: Row(

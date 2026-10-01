@@ -43,10 +43,10 @@ class _WeatherSummaryCardState extends State<WeatherSummaryCard> {
       decoration: BoxDecoration(
         color: AppColors.surfaceCard,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.primaryCyan.withValues(alpha: 0.2)),
+        border: Border.all(color: AppColors.primaryCyan.withOpacity(0.2)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
+            color: Colors.black.withOpacity(0.3),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),
@@ -62,9 +62,9 @@ class _WeatherSummaryCardState extends State<WeatherSummaryCard> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryCyan.withValues(alpha: 0.15),
+                    color: AppColors.primaryCyan.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: AppColors.primaryCyan.withValues(alpha: 0.3)),
+                    border: Border.all(color: AppColors.primaryCyan.withOpacity(0.3)),
                   ),
                   child: Icon(_getWeatherIcon(obs.condition), color: AppColors.primaryCyan, size: 28),
                 ),
@@ -82,7 +82,7 @@ class _WeatherSummaryCardState extends State<WeatherSummaryCard> {
                       const SizedBox(height: 2),
                       Row(
                         children: [
-                          Icon(Icons.schedule, size: 12, color: AppColors.primaryCyan.withValues(alpha: 0.8)),
+                          Icon(Icons.schedule, size: 12, color: AppColors.primaryCyan.withOpacity(0.8)),
                           const SizedBox(width: 4),
                           Text(
                             obs.formattedDateTime,
@@ -93,7 +93,7 @@ class _WeatherSummaryCardState extends State<WeatherSummaryCard> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
-                                color: AppColors.accentEmerald.withValues(alpha: 0.15),
+                                color: AppColors.accentEmerald.withOpacity(0.15),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
@@ -137,10 +137,10 @@ class _WeatherSummaryCardState extends State<WeatherSummaryCard> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
-              color: AppColors.background.withValues(alpha: 0.5),
+              color: AppColors.background.withOpacity(0.5),
               border: Border(
-                top: BorderSide(color: AppColors.surfaceBorder.withValues(alpha: 0.6)),
-                bottom: BorderSide(color: AppColors.surfaceBorder.withValues(alpha: 0.6)),
+                top: BorderSide(color: AppColors.surfaceBorder.withOpacity(0.6)),
+                bottom: BorderSide(color: AppColors.surfaceBorder.withOpacity(0.6)),
               ),
             ),
             child: Row(

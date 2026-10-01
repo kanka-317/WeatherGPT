@@ -134,7 +134,7 @@ class _ClimateAnalyticsScreenState extends State<ClimateAnalyticsScreen> {
                                         dotData: const FlDotData(show: true),
                                         belowBarData: BarAreaData(
                                           show: true,
-                                          color: AppColors.primaryCyan.withValues(alpha: 0.15),
+                                          color: AppColors.primaryCyan.withOpacity(0.15),
                                         ),
                                       ),
                                     ],

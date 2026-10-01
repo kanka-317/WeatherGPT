@@ -40,37 +40,41 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.x'
           channel: 'stable'
           cache: true
 
-      - name: Verify Platform Scaffolding & Permissions
+      - name: Configure Keystore & Signing
         run: |
-          if [ ! -d "android" ]; then
-            echo "Generating platform scaffolding for Android and Web..."
-            cp pubspec.yaml pubspec.yaml.bak
-            flutter create --platforms=android,web --org com.helixminds.weathergpt --project-name weathergpt_mobile .
-            cp pubspec.yaml.bak pubspec.yaml
-          fi
-          # Ensure INTERNET permission is in AndroidManifest.xml
-          if [ -f android/app/src/main/AndroidManifest.xml ]; then
-            grep -q 'android.permission.INTERNET' android/app/src/main/AndroidManifest.xml || sed -i '/<application/i \    <uses-permission android:name="android.permission.INTERNET"/>' android/app/src/main/AndroidManifest.xml
+          if [ ! -f "android/app/release-key.jks" ]; then
+            echo "Generating release keystore..."
+            keytool -genkeypair -v -keystore android/app/release-key.jks -alias weathergpt -keyalg RSA -keysize 2048 -validity 10000 -storepass weathergpt2026 -keypass weathergpt2026 -dname "CN=WeatherGPT, OU=Meteorology, O=HelixMinds, L=Kolkata, ST=WestBengal, C=IN"
+            cp android/app/release-key.jks android/release-key.jks
+            echo "storePassword=weathergpt2026" > android/key.properties
+            echo "keyPassword=weathergpt2026" >> android/key.properties
+            echo "keyAlias=weathergpt" >> android/key.properties
+            echo "storeFile=release-key.jks" >> android/key.properties
           fi
 
       - name: Install Dependencies
         run: flutter pub get
 
-      - name: Build Release APK
+      - name: Build Split APKs (arm64-v8a, armeabi-v7a, x86_64) & Universal APK
         env:
           BACKEND_URL: ${{ github.event.inputs.backend_url || 'https://weathergpt-backend-g6ds.onrender.com' }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN || '' }}
         run: |
-          flutter build apk --release --dart-define=BACKEND_URL=$BACKEND_URL
+          echo "Building split-per-abi APKs..."
+          flutter build apk --release --split-per-abi --dart-define=BACKEND_URL=$BACKEND_URL --dart-define=SENTRY_DSN=$SENTRY_DSN
+          echo "Building universal fallback APK..."
+          flutter build apk --release --dart-define=BACKEND_URL=$BACKEND_URL --dart-define=SENTRY_DSN=$SENTRY_DSN
+          ls -lh build/app/outputs/flutter-apk/
 
       - name: Build Flutter Web (Fallback Zero-Install)
         env:
           BACKEND_URL: ${{ github.event.inputs.backend_url || 'https://weathergpt-backend-g6ds.onrender.com' }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN || '' }}
         run: |
-          flutter build web --release --dart-define=BACKEND_URL=$BACKEND_URL
+          flutter build web --release --dart-define=BACKEND_URL=$BACKEND_URL --dart-define=SENTRY_DSN=$SENTRY_DSN
 
       - name: Upload Web Build Artifact
         uses: actions/upload-artifact@v4
@@ -78,29 +82,49 @@ jobs:
           name: flutter-web-build
           path: mobile/build/web
 
-      - name: Upload APK Artifact
+      - name: Upload Primary APK Artifact (arm64-v8a)
         uses: actions/upload-artifact@v4
         with:
-          name: WeatherGPT-Android-APK
+          name: WeatherGPT-Android-arm64-v8a-APK
+          path: mobile/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+
+      - name: Upload Universal APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: WeatherGPT-Android-Universal-APK
           path: mobile/build/app/outputs/flutter-apk/app-release.apk
 
-      - name: Create GitHub Release with APK
+      - name: Create GitHub Release with Signed APKs
         if: startsWith(github.ref, 'refs/tags/') || github.event.inputs.tag_name != ''
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.inputs.tag_name || github.ref_name }}
           name: WeatherGPT Mobile ${{ github.event.inputs.tag_name || github.ref_name }} (SIH PS 26068)
           body: |
-            ## 📱 WeatherGPT Mobile Client — Direct APK Download
-            - **Target Problem Statement**: SIH 26068
-            - **Backend Endpoint**: `${{ github.event.inputs.backend_url || 'https://weathergpt-backend-g6ds.onrender.com' }}`
-            - **Architecture**: Flutter + Riverpod + WebSocket Real-Time Alerts
+            ## 📱 WeatherGPT Mobile Client — Direct APK Downloads (Signed Release)
+            - **Target Problem Statement**: SIH 26068 (AI Meteorological Intelligence & Disaster Response)
+            - **Backend Cloud Endpoint**: `${{ github.event.inputs.backend_url || 'https://weathergpt-backend-g6ds.onrender.com' }}`
+            - **Architecture**: Flutter + WebSocket Alerts + Sentry Crash Visibility
             
-            ### Installation Instructions
-            1. Download `app-release.apk` directly to your Android device.
-            2. Open the file and enable **"Install from unknown sources"** when prompted.
-            3. Launch WeatherGPT to access conversational meteorological intelligence and live disaster alerts.
+            ### ⬇️ Download Links
+            | Target Architecture | APK Package | Recommended For |
+            | :--- | :--- | :--- |
+            | **ARM64 (64-bit)** *(Recommended)* | [`app-arm64-v8a-release.apk`](https://github.com/kanka-317/WeatherGPT/releases/download/${{ github.event.inputs.tag_name || github.ref_name }}/app-arm64-v8a-release.apk) | 95%+ of modern Android phones (faster, smaller) |
+            | **Universal FAT APK** | [`app-release.apk`](https://github.com/kanka-317/WeatherGPT/releases/download/${{ github.event.inputs.tag_name || github.ref_name }}/app-release.apk) | Any Android device (32-bit & 64-bit combined) |
+            | **ARM32 (32-bit)** | [`app-armeabi-v7a-release.apk`](https://github.com/kanka-317/WeatherGPT/releases/download/${{ github.event.inputs.tag_name || github.ref_name }}/app-armeabi-v7a-release.apk) | Older Android devices |
+            
+            ### 🌐 Zero-Install Mobile Web Fallback
+            - **Live Web Client**: [https://weathergpt-mobile.netlify.app](https://weathergpt-mobile.netlify.app)
+            
+            ### 🛠️ Android Installation Steps
+            1. Download `app-arm64-v8a-release.apk` directly to your phone.
+            2. Tap the downloaded `.apk` file.
+            3. When prompted, tap **"Settings"** and toggle on **"Allow from this source"** (Unknown sources).
+            4. Tap **"Install"** and launch **WeatherGPT**.
           files: |
+            mobile/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+            mobile/build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+            mobile/build/app/outputs/flutter-apk/app-x86_64-release.apk
             mobile/build/app/outputs/flutter-apk/app-release.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

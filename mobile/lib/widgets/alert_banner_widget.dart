@@ -22,12 +22,12 @@ class LiveAlertBannerWidget extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: alertColor.withValues(alpha: 0.15),
+        color: alertColor.withOpacity(0.15),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: alertColor.withValues(alpha: 0.5), width: 1.5),
+        border: Border.all(color: alertColor.withOpacity(0.5), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: alertColor.withValues(alpha: 0.2),
+            color: alertColor.withOpacity(0.2),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -39,7 +39,7 @@ class LiveAlertBannerWidget extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: alertColor.withValues(alpha: 0.25),
+              color: alertColor.withOpacity(0.25),
               shape: BoxShape.circle,
             ),
             child: Icon(alert.icon, color: alertColor, size: 20),

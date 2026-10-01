@@ -119,18 +119,32 @@ class _RealTimeWeatherScreenState extends State<RealTimeWeatherScreen> with Sing
                         hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 12),
                         icon: const Icon(Icons.search, size: 20, color: AppColors.primaryCyan),
                         border: InputBorder.none,
-                        suffixIcon: IconButton(
-                          icon: const Icon(Icons.my_location_rounded, size: 18, color: AppColors.primaryCyan),
-                          onPressed: () {
-                            _searchController.clear();
-                            widget.onLocationChanged({
-                              'name': 'Kolkata (GPS)',
-                              'lat': 22.5726,
-                              'lon': 88.3639,
-                              'state': 'West Bengal',
-                            });
-                            _fetchWeatherData();
-                          },
+                        suffixIcon: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (_isSearching)
+                              const Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: SizedBox(
+                                  width: 14,
+                                  height: 14,
+                                  child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryCyan),
+                                ),
+                              ),
+                            IconButton(
+                              icon: const Icon(Icons.my_location_rounded, size: 18, color: AppColors.primaryCyan),
+                              onPressed: () {
+                                _searchController.clear();
+                                widget.onLocationChanged({
+                                  'name': 'Kolkata (GPS)',
+                                  'lat': 22.5726,
+                                  'lon': 88.3639,
+                                  'state': 'West Bengal',
+                                });
+                                _fetchWeatherData();
+                              },
+                            ),
+                          ],
                         ),
                       ),
                       onChanged: _onSearchChanged,
@@ -144,7 +158,7 @@ class _RealTimeWeatherScreenState extends State<RealTimeWeatherScreen> with Sing
                       decoration: BoxDecoration(
                         color: AppColors.surfaceElevated,
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: AppColors.primaryCyan.withValues(alpha: 0.3)),
+                        border: Border.all(color: AppColors.primaryCyan.withOpacity(0.3)),
                       ),
                       child: Column(
                         children: _searchResults.map((loc) {
@@ -177,7 +191,7 @@ class _RealTimeWeatherScreenState extends State<RealTimeWeatherScreen> with Sing
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: const [
+                          colors: [
                             AppColors.surfaceCard,
                             AppColors.surfaceElevated,
                           ],
@@ -185,7 +199,7 @@ class _RealTimeWeatherScreenState extends State<RealTimeWeatherScreen> with Sing
                           end: Alignment.bottomRight,
                         ),
                         borderRadius: BorderRadius.circular(24),
-                        border: Border.all(color: AppColors.primaryCyan.withValues(alpha: 0.3)),
+                        border: Border.all(color: AppColors.primaryCyan.withOpacity(0.3)),
                       ),
                       child: Column(
                         children: [
@@ -209,9 +223,9 @@ class _RealTimeWeatherScreenState extends State<RealTimeWeatherScreen> with Sing
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: AppColors.primaryCyan.withValues(alpha: 0.15),
+                                  color: AppColors.primaryCyan.withOpacity(0.15),
                                   borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(color: AppColors.primaryCyan.withValues(alpha: 0.3)),
+                                  border: Border.all(color: AppColors.primaryCyan.withOpacity(0.3)),
                                 ),
                                 child: Text(
                                   obs.source.toUpperCase(),
@@ -345,7 +359,7 @@ class _RealTimeWeatherScreenState extends State<RealTimeWeatherScreen> with Sing
       child: Row(
         children: [
           CircleAvatar(
-            backgroundColor: color.withValues(alpha: 0.15),
+            backgroundColor: color.withOpacity(0.15),
             radius: 18,
             child: Icon(icon, color: color, size: 18),
           ),

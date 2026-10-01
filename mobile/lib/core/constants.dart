@@ -2,10 +2,27 @@ import 'package:flutter/material.dart';
 
 class AppConstants {
   // Production Render Backend URL (reused exactly as requested)
-  static const String defaultBackendUrl = 'https://weathergpt-backend-g6ds.onrender.com';
+  static const String defaultBackendUrl = String.fromEnvironment(
+    'BACKEND_URL',
+    defaultValue: 'https://weathergpt-backend-g6ds.onrender.com',
+  );
   
+  // Sentry DSN for mobile crash tracking (free tier)
+  static const String sentryDsn = String.fromEnvironment(
+    'SENTRY_DSN',
+    defaultValue: '',
+  );
+
   // WebSocket live alert feed URL
-  static const String defaultWsUrl = 'wss://weathergpt-backend-g6ds.onrender.com/ws/alerts';
+  static String get defaultWsUrl {
+    const backend = defaultBackendUrl;
+    if (backend.startsWith('https://')) {
+      return 'wss://${backend.substring(8)}/ws/alerts';
+    } else if (backend.startsWith('http://')) {
+      return 'ws://${backend.substring(7)}/ws/alerts';
+    }
+    return 'wss://weathergpt-backend-g6ds.onrender.com/ws/alerts';
+  }
 
   // Fallback / Initial coordinates (Kolkata, West Bengal)
   static const String defaultLocationName = 'Kolkata';
