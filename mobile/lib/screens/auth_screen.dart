@@ -95,7 +95,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 Center(
                   child: CircleAvatar(
                     radius: 30,
-                    backgroundColor: AppColors.primaryCyan.withOpacity(0.15),
+                    backgroundColor: AppColors.primaryCyan.withValues(alpha: 0.15),
                     child: const Icon(Icons.cloud_sync_rounded, color: AppColors.primaryCyan, size: 32),
                   ),
                 ),
@@ -120,7 +120,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: AppColors.dangerRed.withOpacity(0.12),
+                      color: AppColors.dangerRed.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: AppColors.dangerRed),
                     ),
@@ -137,7 +137,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   ),
                   const SizedBox(height: 14),
                   DropdownButtonFormField<String>(
-                    value: _selectedRole,
+                    initialValue: _selectedRole,
                     dropdownColor: AppColors.surfaceElevated,
                     style: const TextStyle(color: AppColors.textPrimary),
                     decoration: _inputDeco('Persona Role', Icons.badge_outlined),
@@ -213,8 +213,8 @@ class _AuthScreenState extends State<AuthScreen> {
       filled: true,
       fillColor: AppColors.background,
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: AppColors.surfaceBorder)),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: AppColors.surfaceBorder)),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: AppColors.surfaceBorder)),
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: AppColors.surfaceBorder)),
       focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: AppColors.primaryCyan)),
     );
   }

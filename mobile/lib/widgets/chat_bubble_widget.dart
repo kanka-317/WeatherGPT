@@ -49,7 +49,7 @@ class _ChatBubbleWidgetState extends State<ChatBubbleWidget> {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 8,
                   offset: const Offset(0, 3),
                 ),
@@ -64,9 +64,9 @@ class _ChatBubbleWidgetState extends State<ChatBubbleWidget> {
                     margin: const EdgeInsets.only(bottom: 6),
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryCyan.withOpacity(0.15),
+                      color: AppColors.primaryCyan.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: AppColors.primaryCyan.withOpacity(0.3)),
+                      border: Border.all(color: AppColors.primaryCyan.withValues(alpha: 0.3)),
                     ),
                     child: Text(
                       '${widget.message.userRole!.toUpperCase()} ADVISORY',

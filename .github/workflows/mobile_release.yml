@@ -44,16 +44,17 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Generate Android & Web Scaffolding
+      - name: Verify Platform Scaffolding & Permissions
         run: |
-          echo "Generating platform scaffolding for Android and Web..."
-          cp pubspec.yaml pubspec.yaml.bak
-          flutter create --platforms=android,web --org com.helixminds.weathergpt --project-name weathergpt_mobile .
-          cp pubspec.yaml.bak pubspec.yaml
-          
-          # Ensure INTERNET permission is granted in AndroidManifest.xml
+          if [ ! -d "android" ]; then
+            echo "Generating platform scaffolding for Android and Web..."
+            cp pubspec.yaml pubspec.yaml.bak
+            flutter create --platforms=android,web --org com.helixminds.weathergpt --project-name weathergpt_mobile .
+            cp pubspec.yaml.bak pubspec.yaml
+          fi
+          # Ensure INTERNET permission is in AndroidManifest.xml
           if [ -f android/app/src/main/AndroidManifest.xml ]; then
-            sed -i '/<application/i \    <uses-permission android:name="android.permission.INTERNET"/>' android/app/src/main/AndroidManifest.xml || true
+            grep -q 'android.permission.INTERNET' android/app/src/main/AndroidManifest.xml || sed -i '/<application/i \    <uses-permission android:name="android.permission.INTERNET"/>' android/app/src/main/AndroidManifest.xml
           fi
 
       - name: Install Dependencies

@@ -108,13 +108,16 @@ class ApiService {
   // 5. Conversational Chat with Role & Location Grounding
   Future<ChatMessageModel> sendChat({
     required String message,
-    required String sessionId,
+    String? sessionId,
+    // ignore: non_constant_identifier_names
+    String? session_id,
     double? lat,
     double? lon,
     String language = 'en',
     String? role,
   }) async {
     final effectiveRole = role ?? LocalStorageService.getUserRole();
+    final effectiveSessionId = sessionId ?? session_id ?? LocalStorageService.getSessionId();
     
     // Enrich message with user role persona context matching web client
     String enrichedMessage = message;
@@ -124,7 +127,7 @@ class ApiService {
 
     final payload = {
       'message': enrichedMessage,
-      'session_id': sessionId,
+      'session_id': effectiveSessionId,
       if (lat != null) 'lat': lat,
       if (lon != null) 'lon': lon,
       'language': language,

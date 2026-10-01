@@ -120,11 +120,11 @@ class _DisasterManagerScreenState extends State<DisasterManagerScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.surfaceCard,
         elevation: 0,
-        title: Row(
+        title: const Row(
           children: [
-            const Icon(Icons.shield_rounded, color: AppColors.dangerRed, size: 22),
-            const SizedBox(width: 8),
-            const Text('Disaster Operations War Room', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+            Icon(Icons.shield_rounded, color: AppColors.dangerRed, size: 22),
+            SizedBox(width: 8),
+            Text('Disaster Operations War Room', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
           ],
         ),
         actions: [
@@ -167,7 +167,7 @@ class _DisasterManagerScreenState extends State<DisasterManagerScreen> {
                     decoration: BoxDecoration(
                       color: AppColors.surfaceCard,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: AppColors.primaryCyan.withOpacity(0.3)),
+                      border: Border.all(color: AppColors.primaryCyan.withValues(alpha: 0.3)),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,7 +199,7 @@ class _DisasterManagerScreenState extends State<DisasterManagerScreen> {
                             decoration: BoxDecoration(
                               color: AppColors.surfaceElevated,
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: color.withOpacity(0.4)),
+                              border: Border.all(color: color.withValues(alpha: 0.4)),
                             ),
                             child: ListTile(
                               dense: true,
@@ -208,11 +208,11 @@ class _DisasterManagerScreenState extends State<DisasterManagerScreen> {
                               subtitle: Text(sc['type']!, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary), maxLines: 1),
                               trailing: ElevatedButton.icon(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: color.withOpacity(0.18),
+                                  backgroundColor: color.withValues(alpha: 0.18),
                                   foregroundColor: color,
                                   elevation: 0,
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8), side: BorderSide(color: color.withOpacity(0.6))),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8), side: BorderSide(color: color.withValues(alpha: 0.6))),
                                 ),
                                 icon: const Icon(Icons.send_rounded, size: 12),
                                 label: const Text('Broadcast', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
@@ -250,7 +250,7 @@ class _DisasterManagerScreenState extends State<DisasterManagerScreen> {
                         decoration: BoxDecoration(
                           color: AppColors.surfaceCard,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: color.withOpacity(0.5)),
+                          border: Border.all(color: color.withValues(alpha: 0.5)),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,

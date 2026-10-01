@@ -104,7 +104,7 @@ class _RiskMapScreenState extends State<RiskMapScreen> {
                     margin: const EdgeInsets.only(bottom: 8),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: a.color.withOpacity(0.12),
+                      color: a.color.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: a.color),
                     ),
@@ -178,11 +178,11 @@ class _RiskMapScreenState extends State<RiskMapScreen> {
                       onTap: () => _showDistrictDetails(d['name'], lat, lon),
                       child: Container(
                         decoration: BoxDecoration(
-                          color: color.withOpacity(0.3),
+                          color: color.withValues(alpha: 0.3),
                           shape: BoxShape.circle,
                           border: Border.all(color: color, width: 2.5),
                           boxShadow: [
-                            BoxShadow(color: color.withOpacity(0.4), blurRadius: 10),
+                            BoxShadow(color: color.withValues(alpha: 0.4), blurRadius: 10),
                           ],
                         ),
                         child: Center(
@@ -204,7 +204,7 @@ class _RiskMapScreenState extends State<RiskMapScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
-                color: AppColors.surfaceCard.withOpacity(0.92),
+                color: AppColors.surfaceCard.withValues(alpha: 0.92),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: AppColors.surfaceBorder),
                 boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 10)],

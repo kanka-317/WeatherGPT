@@ -15,7 +15,7 @@ class WakingServerIndicator extends StatelessWidget {
         return Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          color: AppColors.warningAmber.withOpacity(0.9),
+          color: AppColors.warningAmber.withValues(alpha: 0.9),
           child: const Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

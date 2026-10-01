@@ -74,7 +74,7 @@ class RoleSelectorSheet extends StatelessWidget {
               return Container(
                 margin: const EdgeInsets.only(bottom: 8),
                 decoration: BoxDecoration(
-                  color: isSelected ? AppColors.primaryCyan.withOpacity(0.12) : AppColors.surfaceElevated,
+                  color: isSelected ? AppColors.primaryCyan.withValues(alpha: 0.12) : AppColors.surfaceElevated,
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
                     color: isSelected ? AppColors.primaryCyan : AppColors.surfaceBorder,

@@ -171,9 +171,9 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
         ],
       ),
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: AppColors.surfaceCard,
-          border: Border(top: BorderSide(color: AppColors.surfaceBorder)),
+          border: const Border(top: const BorderSide(color: AppColors.surfaceBorder)),
         ),
         child: BottomNavigationBar(
           currentIndex: _currentIndex < navItems.length ? _currentIndex : 0,

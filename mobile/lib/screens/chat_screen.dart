@@ -132,7 +132,7 @@ class _ChatScreenState extends State<ChatScreen> {
     try {
       final assistantMsg = await _apiService.sendChat(
         message: text,
-        session_id: sessionId,
+        sessionId: sessionId,
         lat: lat,
         lon: lon,
         language: _currentLanguage,
@@ -203,9 +203,9 @@ class _ChatScreenState extends State<ChatScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryCyan.withOpacity(0.15),
+                    color: AppColors.primaryCyan.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: AppColors.primaryCyan.withOpacity(0.3)),
+                    border: Border.all(color: AppColors.primaryCyan.withValues(alpha: 0.3)),
                   ),
                   child: const Text('SIH PS 26068', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.primaryCyan)),
                 ),
@@ -237,7 +237,7 @@ class _ChatScreenState extends State<ChatScreen> {
               decoration: BoxDecoration(
                 color: AppColors.surfaceElevated,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppColors.primaryCyan.withOpacity(0.4)),
+                border: Border.all(color: AppColors.primaryCyan.withValues(alpha: 0.4)),
               ),
               child: Row(
                 children: [
@@ -370,9 +370,9 @@ class _ChatScreenState extends State<ChatScreen> {
           // Input Bar with Mic & Send
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.surfaceCard,
-              border: Border(top: BorderSide(color: AppColors.surfaceBorder)),
+              border: const Border(top: const BorderSide(color: AppColors.surfaceBorder)),
             ),
             child: SafeArea(
               child: Row(
@@ -399,11 +399,11 @@ class _ChatScreenState extends State<ChatScreen> {
                         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),
-                          borderSide: BorderSide(color: AppColors.surfaceBorder),
+                          borderSide: const BorderSide(color: AppColors.surfaceBorder),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),
-                          borderSide: BorderSide(color: AppColors.surfaceBorder),
+                          borderSide: const BorderSide(color: AppColors.surfaceBorder),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),

@@ -144,7 +144,7 @@ class _RealTimeWeatherScreenState extends State<RealTimeWeatherScreen> with Sing
                       decoration: BoxDecoration(
                         color: AppColors.surfaceElevated,
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: AppColors.primaryCyan.withOpacity(0.3)),
+                        border: Border.all(color: AppColors.primaryCyan.withValues(alpha: 0.3)),
                       ),
                       child: Column(
                         children: _searchResults.map((loc) {
@@ -176,8 +176,8 @@ class _RealTimeWeatherScreenState extends State<RealTimeWeatherScreen> with Sing
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
+                        gradient: const LinearGradient(
+                          colors: const [
                             AppColors.surfaceCard,
                             AppColors.surfaceElevated,
                           ],
@@ -185,7 +185,7 @@ class _RealTimeWeatherScreenState extends State<RealTimeWeatherScreen> with Sing
                           end: Alignment.bottomRight,
                         ),
                         borderRadius: BorderRadius.circular(24),
-                        border: Border.all(color: AppColors.primaryCyan.withOpacity(0.3)),
+                        border: Border.all(color: AppColors.primaryCyan.withValues(alpha: 0.3)),
                       ),
                       child: Column(
                         children: [
@@ -209,9 +209,9 @@ class _RealTimeWeatherScreenState extends State<RealTimeWeatherScreen> with Sing
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: AppColors.primaryCyan.withOpacity(0.15),
+                                  color: AppColors.primaryCyan.withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(color: AppColors.primaryCyan.withOpacity(0.3)),
+                                  border: Border.all(color: AppColors.primaryCyan.withValues(alpha: 0.3)),
                                 ),
                                 child: Text(
                                   obs.source.toUpperCase(),
@@ -345,7 +345,7 @@ class _RealTimeWeatherScreenState extends State<RealTimeWeatherScreen> with Sing
       child: Row(
         children: [
           CircleAvatar(
-            backgroundColor: color.withOpacity(0.15),
+            backgroundColor: color.withValues(alpha: 0.15),
             radius: 18,
             child: Icon(icon, color: color, size: 18),
           ),
