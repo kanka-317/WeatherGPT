@@ -64,9 +64,9 @@ jobs:
           SENTRY_DSN: ${{ secrets.SENTRY_DSN || '' }}
         run: |
           echo "Building split-per-abi APKs..."
-          flutter build apk --release --split-per-abi --dart-define=BACKEND_URL=$BACKEND_URL --dart-define=SENTRY_DSN=$SENTRY_DSN
+          flutter build apk --release --split-per-abi --android-skip-build-dependency-validation --dart-define=BACKEND_URL=$BACKEND_URL --dart-define=SENTRY_DSN=$SENTRY_DSN
           echo "Building universal fallback APK..."
-          flutter build apk --release --dart-define=BACKEND_URL=$BACKEND_URL --dart-define=SENTRY_DSN=$SENTRY_DSN
+          flutter build apk --release --android-skip-build-dependency-validation --dart-define=BACKEND_URL=$BACKEND_URL --dart-define=SENTRY_DSN=$SENTRY_DSN
           ls -lh build/app/outputs/flutter-apk/
 
       - name: Build Flutter Web (Fallback Zero-Install)

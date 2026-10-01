@@ -53,7 +53,7 @@ def generate_styled_qr(data: str, title: str, subtitle: str, filename: str, acce
 if __name__ == "__main__":
     os.makedirs("demo_assets", exist_ok=True)
     
-    apk_url = "https://github.com/kanka-317/WeatherGPT/releases/download/v1.0.0/app-arm64-v8a-release.apk"
+    apk_url = "https://github.com/kanka-317/WeatherGPT/releases/download/v1.0.1/app-arm64-v8a-release.apk"
     web_url = "https://weathergpt-mobile.netlify.app"
 
     generate_styled_qr(
